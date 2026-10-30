@@ -1,8 +1,7 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
 
-const LOGIN_URL = '/'; // change if your login route is different (e.g. '/')
-
+const LOGIN_URL = '/';
 
 /**
  * @param {import('@playwright/test').Page} page
@@ -22,7 +21,7 @@ async function mockLogin(page, { status = 200, body = { message: 'ok' } } = {}) 
 }
 
 /**
- * @param {{ route: (arg0: string, arg1: { (route: any): Promise<any>; (route: any): Promise<void>; }) => any; }} page
+ * @param {import('@playwright/test').Page} page
  */
 async function mockAuth(page) {
   let loggedIn = false;
@@ -43,101 +42,107 @@ async function mockAuth(page) {
   });
 }
 
-test('redirects to login when not authenticated', async ({ page }) => {
-  await mockAuth(page); // /me returns 401 because nobody is logged in
+test.describe('Auth redirects', () => {
+  test('redirects to login when not authenticated', async ({ page }) => {
+    await mockAuth(page); // /me returns 401 because nobody is logged in
 
-  await page.goto('/home'); // protected route
-  await expect(page).toHaveURL('/');
-  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+    await page.goto('/home'); // protected route
+    await expect(page).toHaveURL('/');
+    await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+  });
+
+  test('shows the login page at / when not authenticated', async ({ page }) => {
+    await mockAuth(page);
+
+    await page.goto('/');
+    await expect(page).toHaveURL('/');
+    await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+  });
 });
 
-test('shows the login page at / when not authenticated', async ({ page }) => {
-  await mockAuth(page);
+test.describe('Login page', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(LOGIN_URL);
+  });
 
-  await page.goto('/');
-  await expect(page).toHaveURL('/');
-  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
-});
+  test('renders the login form', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+    await expect(page.getByText('Welcome back to the My Playground')).toBeVisible();
+    await expect(page.getByLabel('Email')).toBeVisible();
+    await expect(page.getByLabel('Password', { exact: true })).toBeVisible();
+    await expect(page.getByRole('checkbox', { name: 'Remember me' })).toBeChecked();
+    await expect(page.getByRole('button', { name: 'Sign in' })).toBeEnabled();
+    await expect(page.getByText('Demo: admin@example.com / password')).toBeVisible();
+  });
 
-test('renders the login form', async ({ page }) => {
-  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
-  await expect(page.getByText('Welcome back to the My Playground')).toBeVisible();
-  await expect(page.getByLabel('Email')).toBeVisible();
-  await expect(page.getByLabel('Password', { exact: true })).toBeVisible();
-  await expect(page.getByRole('checkbox', { name: 'Remember me' })).toBeChecked();
-  await expect(page.getByRole('button', { name: 'Sign in' })).toBeEnabled();
-  await expect(page.getByText('Demo: admin@example.com / password')).toBeVisible();
-});
+  test('shows required errors when submitting an empty form', async ({ page }) => {
+    await page.getByRole('button', { name: 'Sign in' }).click();
 
-test('shows required errors when submitting an empty form', async ({ page }) => {
-  await page.getByRole('button', { name: 'Sign in' }).click();
+    await expect(page.getByText('Enter your email')).toBeVisible();
+    await expect(page.getByText('Enter your password')).toBeVisible();
+  });
 
-  await expect(page.getByText('Enter your email')).toBeVisible();
-  await expect(page.getByText('Enter your password')).toBeVisible();
-});
+  test('shows an error for an invalid email format', async ({ page }) => {
+    await page.getByLabel('Email').fill('not-an-email');
+    await page.getByLabel('Password', { exact: true }).fill('password');
+    await page.getByRole('button', { name: 'Sign in' }).click();
 
-test('shows an error for an invalid email format', async ({ page }) => {
-  await page.getByLabel('Email').fill('not-an-email');
-  await page.getByLabel('Password', { exact: true }).fill('password');
-  await page.getByRole('button', { name: 'Sign in' }).click();
+    await expect(page.getByText('Enter a valid email address')).toBeVisible();
+  });
 
-  await expect(page.getByText('Enter a valid email address')).toBeVisible();
-});
+  test('shows an error when password is missing', async ({ page }) => {
+    await page.getByLabel('Email').fill('admin@example.com');
+    await page.getByRole('button', { name: 'Sign in' }).click();
 
-test('shows an error when password is missing', async ({ page }) => {
-  await page.getByLabel('Email').fill('admin@example.com');
-  await page.getByRole('button', { name: 'Sign in' }).click();
+    await expect(page.getByText('Enter your password')).toBeVisible();
+    await expect(page.getByText('Enter your email')).toBeHidden();
+  });
 
-  await expect(page.getByText('Enter your password')).toBeVisible();
-  await expect(page.getByText('Enter your email')).toBeHidden();
-});
+  test('toggles password visibility', async ({ page }) => {
+    const password = page.getByLabel('Password', { exact: true });
+    await password.fill('secret123');
+    await expect(password).toHaveAttribute('type', 'password');
 
-test('toggles password visibility', async ({ page }) => {
-  const password = page.getByLabel('Password', { exact: true });
-  await password.fill('secret123');
-  await expect(password).toHaveAttribute('type', 'password');
+    await page.getByRole('img', { name: /eye/ }).click();
+    await expect(password).toHaveAttribute('type', 'text');
+  });
 
-  await page.getByRole('img', { name: /eye/ }).click();
-  await expect(password).toHaveAttribute('type', 'text');
-});
+  test('toggles dark / light mode', async ({ page }) => {
+    const themeSwitch = page.getByRole('switch');
+    await expect(themeSwitch).not.toBeChecked();
 
-test('toggles dark / light mode', async ({ page }) => {
-  const themeSwitch = page.getByRole('switch');
-  await expect(themeSwitch).not.toBeChecked();
+    await themeSwitch.click();
+    await expect(themeSwitch).toBeChecked();
+    await expect(page.getByText('Dark')).toBeVisible();
 
-  await themeSwitch.click();
-  await expect(themeSwitch).toBeChecked();
-  await expect(page.getByText('Dark')).toBeVisible();
+    await themeSwitch.click();
+    await expect(themeSwitch).not.toBeChecked();
+    await expect(page.getByText('Light')).toBeVisible();
+  });
 
-  await themeSwitch.click();
-  await expect(themeSwitch).not.toBeChecked();
-  await expect(page.getByText('Light')).toBeVisible();
-});
+  test('shows an alert and stays on the page when login fails', async ({ page }) => {
+    await mockLogin(page, { status: 401, body: { message: 'Invalid credentials' } });
 
-test('shows an alert and stays on the page when login fails', async ({ page }) => {
-  await mockLogin(page, { status: 401, body: { message: 'Invalid credentials' } });
+    await page.getByLabel('Email').fill('admin@example.com');
+    await page.getByLabel('Password', { exact: true }).fill('wrong-password');
+    await page.getByRole('button', { name: 'Sign in' }).click();
 
-  await page.getByLabel('Email').fill('admin@example.com');
-  await page.getByLabel('Password', { exact: true }).fill('wrong-password');
-  await page.getByRole('button', { name: 'Sign in' }).click();
+    const alert = page.getByRole('alert');
+    await expect(alert).toBeVisible();
+    await expect(page).toHaveURL('/');
 
-  const alert = page.getByRole('alert');
-  await expect(alert).toBeVisible();
-  await expect(page).toHaveURL('/');
-  // The alert can be dismissed
-  await alert.getByRole('button', { name: /close/i }).click();
-  await expect(alert).toBeHidden();
-});
+    // The alert can be dismissed
+    await alert.getByRole('button', { name: /close/i }).click();
+    await expect(alert).toBeHidden();
+  });
 
+  test('redirects to /home after a successful login', async ({ page }) => {
+    await mockLogin(page, { status: 200, body: { user: { email: 'admin@example.com' } } });
 
+    await page.getByLabel('Email').fill('admin@example.com');
+    await page.getByLabel('Password', { exact: true }).fill('password');
+    await page.getByRole('button', { name: 'Sign in' }).click();
 
-test('redirects to /home after a successful login', async ({ page }) => {
-  await mockLogin(page, { status: 200, body: { user: { email: 'admin@example.com' } } });
-
-  await page.getByLabel('Email').fill('admin@example.com');
-  await page.getByLabel('Password', { exact: true }).fill('password');
-  await page.getByRole('button', { name: 'Sign in' }).click();
-
-  await expect(page).toHaveURL(/\/home/);
-});
+    await expect(page).toHaveURL(/\/home/);
+  });
 });
