@@ -23,6 +23,6 @@ export function PublicOnlyRoute({ children }) {
    const { isAuthenticated, loading } = useAuth();
 
    if (loading) return <FullPageSpinner />;
-   if (isAuthenticated) return <Navigate to="/home" replace />;
+   // if (isAuthenticated) return <Navigate to="/home" replace />;
    return children;
 }
