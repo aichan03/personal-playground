@@ -1,34 +1,44 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Outlet } from "react-router";
 import ErrorPage from "./pages/Errorpage";
 import MainLayout from "./layouts/MainLayout.jsx";
+import Login from "./pages/Login.jsx";
 import { useAppTheme } from "./providers/ThemeProvider.jsx";
 import { ConfigProvider } from "antd";
+import { AuthProvider } from "./providers/AuthProvider.jsx";
+import { ProtectedRoute, PublicOnlyRoute } from "./components/ProtectedRoute.jsx";
 
-function AppTheme() {
+function Providers() {
    const { themeConfig } = useAppTheme();
    return (
       <ConfigProvider theme={themeConfig}>
-         <MainLayout />
+         <AuthProvider >
+            <Outlet />
+         </AuthProvider>
       </ConfigProvider>
    );
 }
 
 const router = createBrowserRouter([
    {
-      path: '/',
-      element: <AppTheme />,
-      errorElement: <ErrorPage />,
+      element: <Providers />, // layout route: AuthProvider wraps everything below
       children: [
          {
-            index: true,
-            lazy: () => import('./pages/Home.jsx').then((m) => ({ Component: m.default }))
+            path: "/",
+            element: (
+               <PublicOnlyRoute>
+                  <Login />
+               </PublicOnlyRoute>
+            ),
          },
          {
-            path: '*',
-            lazy: () => import('./pages/NotFound.jsx').then((m) => ({ Component: m.default }))
-         }
-      ]
-   }
+            element: <ProtectedRoute />, // guard for all private pages
+            children: [
+               { path: "/home", element: <MainLayout /> },
+               // other private routes...
+            ],
+         },
+      ],
+   },
 ]);
 
 export default router
