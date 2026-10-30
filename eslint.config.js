@@ -7,6 +7,7 @@ import prettier from 'eslint-config-prettier'
 
 export default [
   { ignores: ['dist', 'node_modules', 'playwright-report', 'test-results'] },
+  { linterOptions: { reportUnusedDisableDirectives: 'warn' } },
 
   // App code (browser)
   {

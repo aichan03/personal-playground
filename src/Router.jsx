@@ -1,30 +1,17 @@
-import { createBrowserRouter, Outlet } from "react-router";
-import ErrorPage from "./pages/Errorpage";
-import MainLayout from "./layouts/MainLayout.jsx";
-import Login from "./pages/Login.jsx";
-import { useAppTheme } from "./providers/ThemeProvider.jsx";
-import { ConfigProvider } from "antd";
-import { AuthProvider } from "./providers/AuthProvider.jsx";
-import { ProtectedRoute, PublicOnlyRoute } from "./components/ProtectedRoute.jsx";
-
-function Providers() {
-   const { themeConfig } = useAppTheme();
-   return (
-      <ConfigProvider theme={themeConfig}>
-         <AuthProvider>
-            <Outlet />
-         </AuthProvider>
-      </ConfigProvider>
-   );
-}
+import { createBrowserRouter } from 'react-router'
+import ErrorPage from './pages/Errorpage'
+import RootLayout from './layouts/RootLayout.jsx'
+import MainLayout from './layouts/MainLayout.jsx'
+import Login from './pages/Login.jsx'
+import { ProtectedRoute, PublicOnlyRoute } from './components/ProtectedRoute.jsx'
 
 const router = createBrowserRouter([
    {
-      element: <Providers />,
+      element: <RootLayout />,
       errorElement: <ErrorPage />,
       children: [
          {
-            path: "/",
+            path: '/',
             element: (
                <PublicOnlyRoute>
                   <Login />
@@ -33,12 +20,10 @@ const router = createBrowserRouter([
          },
          {
             element: <ProtectedRoute />,
-            children: [
-               { path: "/home", element: <MainLayout /> },
-            ],
+            children: [{ path: '/home', element: <MainLayout /> }],
          },
       ],
    },
-]);
+])
 
-export default router;
+export default router
