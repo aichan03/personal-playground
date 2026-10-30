@@ -21,8 +21,7 @@ export function ProtectedRoute() {
 
 export function PublicOnlyRoute({ children }) {
    const { isAuthenticated, loading } = useAuth()
-
-   if (loading) return <FullPageSpinner />
+   if (loading) return null
    if (isAuthenticated) return <Navigate to="/home" replace />
-   return children
+   return children ?? <Outlet />
 }

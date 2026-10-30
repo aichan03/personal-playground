@@ -1,10 +1,10 @@
 import { Outlet } from 'react-router'
 import { ConfigProvider } from 'antd'
-import { useAppTheme } from '../providers/ThemeProvider.jsx'
-import { AuthProvider } from '../providers/AuthProvider.jsx'
+import { useTheme } from '../providers/theme/useTheme.js'
+import { AuthProvider } from '../providers/auth/AuthProvider.jsx'
 
 export default function RootLayout() {
-   const { themeConfig } = useAppTheme()
+   const { themeConfig } = useTheme()
    return (
       <ConfigProvider theme={themeConfig}>
          <AuthProvider>

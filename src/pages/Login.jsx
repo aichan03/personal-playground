@@ -4,13 +4,13 @@ import { Alert, Button, Card, Checkbox, Flex, Form, Input, Switch, Typography, t
 import { MdOutlineDashboardCustomize } from 'react-icons/md'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router'
-import { useAppTheme } from '../providers/ThemeProvider'
+import { useTheme } from '../providers/theme'
 import { useAuth } from '../providers/auth'
 
 const { Title, Text } = Typography
 
 export default function Login() {
-   const { mode, toggleMode } = useAppTheme()
+   const { mode, toggleMode } = useTheme()
    const {
       token: { colorBgLayout, colorPrimary, borderRadiusLG },
    } = theme.useToken()

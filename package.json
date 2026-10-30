@@ -44,6 +44,7 @@
     "globals": "^15.9.0",
     "jsdom": "^30.0.1",
     "prettier": "^3.9.10",
+    "rollup-plugin-visualizer": "^7.1.1",
     "vitest": "^4.1.10"
   },
   "allowScripts": {

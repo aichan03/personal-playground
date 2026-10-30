@@ -3,8 +3,8 @@ import { Avatar, Breadcrumb, Dropdown, Layout, Menu, Space, Switch, Typography, 
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons'
 import { MdOutlineDashboardCustomize } from 'react-icons/md'
 import { Link, Outlet, useNavigate } from 'react-router'
-import { useAppTheme } from '../providers/useAppTheme'
 import { useAuth } from '../providers/auth'
+import { useTheme } from '../providers/theme'
 
 const { Sider, Header, Content } = Layout
 
@@ -21,7 +21,7 @@ const items = [
 ]
 
 export default function MainLayout() {
-   const { mode, toggleMode } = useAppTheme()
+   const { mode, toggleMode } = useTheme()
    const { logout } = useAuth()
 
    const navigate = useNavigate()
