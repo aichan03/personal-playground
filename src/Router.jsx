@@ -11,7 +11,7 @@ function Providers() {
    const { themeConfig } = useAppTheme();
    return (
       <ConfigProvider theme={themeConfig}>
-         <AuthProvider >
+         <AuthProvider>
             <Outlet />
          </AuthProvider>
       </ConfigProvider>
@@ -20,7 +20,8 @@ function Providers() {
 
 const router = createBrowserRouter([
    {
-      element: <Providers />, // layout route: AuthProvider wraps everything below
+      element: <Providers />,
+      errorElement: <ErrorPage />,
       children: [
          {
             path: "/",
@@ -31,14 +32,13 @@ const router = createBrowserRouter([
             ),
          },
          {
-            element: <ProtectedRoute />, // guard for all private pages
+            element: <ProtectedRoute />,
             children: [
                { path: "/home", element: <MainLayout /> },
-               // other private routes...
             ],
          },
       ],
    },
 ]);
 
-export default router
+export default router;
