@@ -9,7 +9,7 @@ const LOGIN_URL = '/'; // change if your login route is different (e.g. '/')
  * @param {{ status?: number, body?: object }} [options]
  */
 async function mockLogin(page, { status = 200, body = { message: 'ok' } } = {}) {
-  await page.route('**/', async (route) => {
+  await page.route('**/login', async (route) => {
     if (route.request().method() !== 'POST') {
       return route.continue();
     }
@@ -17,6 +17,28 @@ async function mockLogin(page, { status = 200, body = { message: 'ok' } } = {}) 
       status,
       contentType: 'application/json',
       body: JSON.stringify(body),
+    });
+  });
+}
+
+/**
+ * @param {{ route: (arg0: string, arg1: { (route: any): Promise<any>; (route: any): Promise<void>; }) => any; }} page
+ */
+async function mockAuth(page) {
+  let loggedIn = false;
+  const user = { id: 1, email: 'admin@example.com', name: 'Admin' };
+
+  await page.route('**/login', async (route) => {
+    if (route.request().method() !== 'POST') return route.continue();
+    loggedIn = true;
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ user }) });
+  });
+
+  await page.route('**/me', async (route) => {
+    await route.fulfill({
+      status: loggedIn ? 200 : 401,
+      contentType: 'application/json',
+      body: JSON.stringify(loggedIn ? { user } : { message: 'Unauthorized' }),
     });
   });
 }
@@ -90,11 +112,17 @@ test.describe('Login page', () => {
 
     const alert = page.getByRole('alert');
     await expect(alert).toBeVisible();
-    await expect(page).toHaveURL(/\/login/);
-
+    await expect(page).toHaveURL('/');
     // The alert can be dismissed
     await alert.getByRole('button', { name: /close/i }).click();
     await expect(alert).toBeHidden();
+  });
+
+  test('redirects to login when not authenticated', async ({ page }) => {
+    await mockAuth(page);
+
+    await page.goto('/'); // /me returns 401 because nobody logged in
+    await expect(page).toHaveURL('/home');
   });
 
   test('redirects to /home after a successful login', async ({ page }) => {
