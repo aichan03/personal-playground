@@ -44,8 +44,17 @@ async function mockAuth(page) {
 }
 
 test.describe('Login page', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto(LOGIN_URL);
+  test('redirects to login when not authenticated', async ({ page }) => {
+    // /me returns 401 because nobody is logged in
+    await page.goto('/home'); // protected route
+    await expect(page).toHaveURL('/');
+    await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+  });
+
+  test('shows the login page at / when not authenticated', async ({ page }) => {
+    await page.goto('/');
+    await expect(page).toHaveURL('/');
+    await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
   });
 
   test('renders the login form', async ({ page }) => {
