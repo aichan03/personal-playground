@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react'
 import { theme as antdTheme } from 'antd'
+import { ThemeContext } from './ThemeContext'
 
 export function ThemeProvider({ children }) {
    const [mode, setMode] = useState(() => localStorage.getItem('theme') || 'light')
