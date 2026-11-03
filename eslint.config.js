@@ -1,12 +1,16 @@
+// eslint.config.js
 import js from '@eslint/js'
 import globals from 'globals'
 import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
+import importPlugin from 'eslint-plugin-import' // optional: remove with the import rules below
 import prettier from 'eslint-config-prettier'
 
 export default [
-  { ignores: ['dist', 'node_modules', 'playwright-report', 'test-results'] },
+  {
+    ignores: ['dist', 'coverage', 'node_modules', 'playwright-report', 'test-results'],
+  },
   { linterOptions: { reportUnusedDisableDirectives: 'warn' } },
 
   // App code (browser)
@@ -18,20 +22,36 @@ export default [
       globals: { ...globals.browser },
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
-    settings: { react: { version: 'detect' } },
+    settings: {
+      react: { version: 'detect' },
+      // optional: needed by the import plugin, because your imports omit .jsx
+      'import/resolver': { node: { extensions: ['.js', '.jsx'] } },
+    },
     plugins: {
       react,
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
+      import: importPlugin, // optional
     },
     rules: {
       ...js.configs.recommended.rules,
       ...react.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-      'react/react-in-jsx-scope': 'off',
+
+      // React
+      'react/react-in-jsx-scope': 'off', // not needed with the new JSX transform
       'react/prop-types': 'off', // enable if you use PropTypes
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^_' }],
+
+      // Undefined / unused values
+      // (no-undef and react/jsx-no-undef come from the recommended sets above)
+      'no-unused-vars': ['error', { varsIgnorePattern: '^_', argsIgnorePattern: '^_' }],
+
+      // Imports (optional)
+      'import/named': 'error',
+      'import/no-unresolved': 'error',
+
+      // Code quality
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       eqeqeq: ['error', 'always'],
       'prefer-const': 'error',
@@ -39,22 +59,23 @@ export default [
     },
   },
 
-  // Playwright tests + config files (Node)
+  // Node environment: Vitest helpers, Playwright specs, config files
   {
-    files: ['tests/**/*.{js,jsx}', '*.config.{js,cjs,mjs}'],
+    files: ['tests/**/*.{js,jsx}', 'e2e/**/*.js', '*.config.{js,cjs,mjs}'],
     languageOptions: { globals: { ...globals.node } },
     rules: { 'no-console': 'off' },
   },
+
+  // Playwright's fixture callback is named `use`, which the hooks rule mistakes for React's use()
   {
     files: ['e2e/**/*.js'],
-    rules: {
-      'react-hooks/rules-of-hooks': 'off',
-    },
+    rules: { 'react-hooks/rules-of-hooks': 'off' },
   },
-  // Unit tests, if you add Vitest later
+
+  // Vitest unit tests (globals: true in vitest.config.js)
   {
     files: ['**/*.test.{js,jsx}'],
-    languageOptions: { globals: { ...globals.vitest } },
+    languageOptions: { globals: { ...(globals.vitest ?? {}) } },
   },
 
   // Must be last: disables rules that conflict with Prettier
