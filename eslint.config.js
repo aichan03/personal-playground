@@ -24,8 +24,10 @@ export default [
     },
     settings: {
       react: { version: 'detect' },
-      // optional: needed by the import plugin, because your imports omit .jsx
-      'import/resolver': { node: { extensions: ['.js', '.jsx'] } },
+      'import/resolver': {
+        typescript: true,
+        node: { extensions: ['.js', '.jsx'] },
+      },
     },
     plugins: {
       react,
