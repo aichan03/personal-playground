@@ -77,9 +77,6 @@ export default function Login() {
           requiredMark={false}
           size="large"
         >
-
-
-
           <Form.Item
             name="email"
             label="Email"
