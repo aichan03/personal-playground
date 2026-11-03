@@ -47,42 +47,42 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+  # THIS USED FOR VERCEL OR POSSIBLE AUTO DEPLOYMENT
+  # deploy:
+  #   needs: [eslint, e2e]
+  #   runs-on: ubuntu-latest
+  #   # skip fork PRs, since they don't get secrets
+  #   if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+  #   permissions:
+  #     contents: read
+  #     pull-requests: write
+  #   env:
+  #     VERCEL_ENV: ${{ github.event_name == 'push' && 'production' || 'preview' }}
+  #     PROD_FLAG: ${{ github.event_name == 'push' && '--prod' || '' }}
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-  deploy:
-    needs: [eslint, e2e]
-    runs-on: ubuntu-latest
-    # skip fork PRs, since they don't get secrets
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
-    permissions:
-      contents: read
-      pull-requests: write
-    env:
-      VERCEL_ENV: ${{ github.event_name == 'push' && 'production' || 'preview' }}
-      PROD_FLAG: ${{ github.event_name == 'push' && '--prod' || '' }}
-    steps:
-      - uses: actions/checkout@v4
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: lts/*
+  #         cache: npm
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: npm
+  #     - run: npm i -g vercel
 
-      - run: npm i -g vercel
+  #     - run: vercel pull --yes --environment=$VERCEL_ENV
 
-      - run: vercel pull --yes --environment=$VERCEL_ENV
+  #     - run: vercel build $PROD_FLAG
 
-      - run: vercel build $PROD_FLAG
+  #     - name: Deploy
+  #       id: deploy
+  #       run: |
+  #         url=$(vercel deploy --prebuilt $PROD_FLAG)
+  #         echo "url=$url" >> "$GITHUB_OUTPUT"
 
-      - name: Deploy
-        id: deploy
-        run: |
-          url=$(vercel deploy --prebuilt $PROD_FLAG)
-          echo "url=$url" >> "$GITHUB_OUTPUT"
-
-      - name: Comment preview URL on PR
-        if: github.event_name == 'pull_request'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PREVIEW_URL: ${{ steps.deploy.outputs.url }}
-        run: |
-          gh pr comment ${{ github.event.pull_request.number }} --body "Preview deployed: $PREVIEW_URL"
+  #     - name: Comment preview URL on PR
+  #       if: github.event_name == 'pull_request'
+  #       env:
+  #         GH_TOKEN: ${{ github.token }}
+  #         PREVIEW_URL: ${{ steps.deploy.outputs.url }}
+  #       run: |
+  #         gh pr comment ${{ github.event.pull_request.number }} --body "Preview deployed: $PREVIEW_URL"
