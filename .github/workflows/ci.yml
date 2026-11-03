@@ -21,35 +21,24 @@ permissions:
   contents: read
 
 jobs:
-  eslint:
+  checks:
     if: github.event.pull_request.draft == false || github.event_name == 'push'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
-      - run: npm run lint
-
-  prettier:
-    needs: eslint
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
-      - run: npm run format:check
-
-  vitest:
-    needs: prettier
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: npm run test:unit
+
+      # Cheapest first; the job stops at the first failing step
+      - name: ESLint
+        run: npm run lint
+      - name: Prettier
+        run: npm run format:check
+      - name: Unit tests (Vitest)
+        run: npm run test:unit
 
   playwright:
-    needs: vitest
+    needs: checks
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -86,7 +75,7 @@ jobs:
 
   ci-pass:
     if: always()
-    needs: [eslint, prettier, vitest, playwright]
+    needs: [checks, playwright]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any job failed or was cancelled
