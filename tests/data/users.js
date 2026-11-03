@@ -1,8 +1,8 @@
 export const ADMIN = {
-   id: 1,
-   email: 'admin@example.com',
-   name: 'Admin',
-   password: 'password',
+  id: 1,
+  email: 'admin@example.com',
+  name: 'Admin',
+  password: 'password',
 }
 
 const { password: _password, ...PUBLIC_USER } = ADMIN

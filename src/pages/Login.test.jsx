@@ -6,192 +6,194 @@ import Login from './Login.jsx'
 import { ADMIN, INVALID_EMAIL, WRONG_PASSWORD } from '../../tests/data/users.js'
 
 const mocks = vi.hoisted(() => ({
-   login: vi.fn(),
-   navigate: vi.fn(),
-   toggleMode: vi.fn(),
-   mode: 'light',
+  login: vi.fn(),
+  navigate: vi.fn(),
+  toggleMode: vi.fn(),
+  mode: 'light',
 }))
 
 vi.mock('react-router', () => ({ useNavigate: () => mocks.navigate }))
 vi.mock('../providers/auth', () => ({ useAuth: () => ({ login: mocks.login }) }))
 vi.mock('../providers/theme', () => ({
-   useTheme: () => ({ mode: mocks.mode, toggleMode: mocks.toggleMode }),
+  useTheme: () => ({ mode: mocks.mode, toggleMode: mocks.toggleMode }),
 }))
 
 // motion: false so closing the Alert removes it immediately in jsdom
 const renderLogin = () =>
-   render(
-      <ConfigProvider theme={{ token: { motion: false } }}>
-         <Login />
-      </ConfigProvider>,
-   )
+  render(
+    <ConfigProvider theme={{ token: { motion: false } }}>
+      <Login />
+    </ConfigProvider>,
+  )
 
 const emailInput = () => screen.getByLabelText('Email')
 const passwordInput = () => screen.getByLabelText('Password')
 const submitButton = () => screen.getByRole('button', { name: 'Sign in' })
 
 describe('Login page', () => {
-   let user
+  let user
 
-   beforeEach(() => {
-      vi.resetAllMocks()
-      mocks.mode = 'light'
-      mocks.login.mockResolvedValue(undefined)
-      user = userEvent.setup()
-   })
+  beforeEach(() => {
+    vi.resetAllMocks()
+    mocks.mode = 'light'
+    mocks.login.mockResolvedValue(undefined)
+    user = userEvent.setup()
+  })
 
-   test('renders the login form', () => {
+  test('renders the login form', () => {
+    renderLogin()
+
+    expect(screen.getByRole('heading', { name: 'Sign in' })).toBeVisible()
+    expect(screen.getByText(/welcome back to the my playground/i)).toBeVisible()
+    expect(emailInput()).toBeVisible()
+    expect(passwordInput()).toBeVisible()
+    expect(screen.getByRole('checkbox', { name: /remember me/i })).toBeChecked()
+    expect(submitButton()).toBeEnabled()
+    expect(screen.getByText(/demo: admin@example.com \/ password/i)).toBeVisible()
+  })
+
+  describe('validation', () => {
+    test('requires email and password on empty submit', async () => {
       renderLogin()
 
-      expect(screen.getByRole('heading', { name: 'Sign in' })).toBeVisible()
-      expect(screen.getByText(/welcome back to the my playground/i)).toBeVisible()
-      expect(emailInput()).toBeVisible()
-      expect(passwordInput()).toBeVisible()
-      expect(screen.getByRole('checkbox', { name: /remember me/i })).toBeChecked()
-      expect(submitButton()).toBeEnabled()
-      expect(screen.getByText(/demo: admin@example.com \/ password/i)).toBeVisible()
-   })
+      await user.click(submitButton())
 
-   describe('validation', () => {
-      test('requires email and password on empty submit', async () => {
-         renderLogin()
+      expect(await screen.findByText('Enter your email')).toBeVisible()
+      expect(await screen.findByText('Enter your password')).toBeVisible()
+      expect(mocks.login).not.toHaveBeenCalled()
+    })
 
-         await user.click(submitButton())
+    test('rejects an invalid email format', async () => {
+      renderLogin()
 
-         expect(await screen.findByText('Enter your email')).toBeVisible()
-         expect(await screen.findByText('Enter your password')).toBeVisible()
-         expect(mocks.login).not.toHaveBeenCalled()
-      })
+      await user.type(emailInput(), INVALID_EMAIL)
+      await user.type(passwordInput(), ADMIN.password)
+      await user.click(submitButton())
 
-      test('rejects an invalid email format', async () => {
-         renderLogin()
+      expect(await screen.findByText('Enter a valid email address')).toBeVisible()
+      expect(mocks.login).not.toHaveBeenCalled()
+    })
 
-         await user.type(emailInput(), INVALID_EMAIL)
-         await user.type(passwordInput(), ADMIN.password)
-         await user.click(submitButton())
+    test('requires a password', async () => {
+      renderLogin()
 
-         expect(await screen.findByText('Enter a valid email address')).toBeVisible()
-         expect(mocks.login).not.toHaveBeenCalled()
-      })
+      await user.type(emailInput(), ADMIN.email)
+      await user.click(submitButton())
 
-      test('requires a password', async () => {
-         renderLogin()
+      expect(await screen.findByText('Enter your password')).toBeVisible()
+      expect(screen.queryByText('Enter your email')).not.toBeInTheDocument()
+      expect(mocks.login).not.toHaveBeenCalled()
+    })
+  })
 
-         await user.type(emailInput(), ADMIN.email)
-         await user.click(submitButton())
+  describe('interactions', () => {
+    test('toggles password visibility', async () => {
+      renderLogin()
 
-         expect(await screen.findByText('Enter your password')).toBeVisible()
-         expect(screen.queryByText('Enter your email')).not.toBeInTheDocument()
-         expect(mocks.login).not.toHaveBeenCalled()
-      })
-   })
+      await user.type(passwordInput(), 'secret123')
+      expect(passwordInput()).toHaveAttribute('type', 'password')
 
-   describe('interactions', () => {
-      test('toggles password visibility', async () => {
-         renderLogin()
+      await user.click(screen.getByRole('img', { name: /eye/ })) // antd eye icon
+      expect(passwordInput()).toHaveAttribute('type', 'text')
+    })
 
-         await user.type(passwordInput(), 'secret123')
-         expect(passwordInput()).toHaveAttribute('type', 'password')
+    test('shows the light label and calls toggleMode when the switch is clicked', async () => {
+      renderLogin()
 
-         await user.click(screen.getByRole('img', { name: /eye/ })) // antd eye icon
-         expect(passwordInput()).toHaveAttribute('type', 'text')
-      })
+      const themeSwitch = screen.getByRole('switch')
+      expect(themeSwitch).not.toBeChecked()
+      expect(screen.getByText('Light')).toBeVisible()
 
-      test('shows the light label and calls toggleMode when the switch is clicked', async () => {
-         renderLogin()
+      await user.click(themeSwitch)
 
-         const themeSwitch = screen.getByRole('switch')
-         expect(themeSwitch).not.toBeChecked()
-         expect(screen.getByText('Light')).toBeVisible()
+      expect(mocks.toggleMode).toHaveBeenCalledTimes(1)
+    })
 
-         await user.click(themeSwitch)
+    test('shows the dark label when the theme is dark', () => {
+      mocks.mode = 'dark'
+      renderLogin()
 
-         expect(mocks.toggleMode).toHaveBeenCalledTimes(1)
-      })
+      expect(screen.getByRole('switch')).toBeChecked()
+      expect(screen.getByText('Dark')).toBeVisible()
+    })
+  })
 
-      test('shows the dark label when the theme is dark', () => {
-         mocks.mode = 'dark'
-         renderLogin()
+  describe('submission', () => {
+    test('logs in with the form values and redirects to /home', async () => {
+      renderLogin()
 
-         expect(screen.getByRole('switch')).toBeChecked()
-         expect(screen.getByText('Dark')).toBeVisible()
-      })
-   })
+      await user.type(emailInput(), ADMIN.email)
+      await user.type(passwordInput(), ADMIN.password)
+      await user.click(submitButton())
 
-   describe('submission', () => {
-      test('logs in with the form values and redirects to /home', async () => {
-         renderLogin()
+      await waitFor(() =>
+        expect(mocks.login).toHaveBeenCalledWith({
+          email: ADMIN.email,
+          password: ADMIN.password,
+          remember: true,
+        }),
+      )
+      expect(mocks.navigate).toHaveBeenCalledWith('/home', { replace: true })
+    })
 
-         await user.type(emailInput(), ADMIN.email)
-         await user.type(passwordInput(), ADMIN.password)
-         await user.click(submitButton())
+    test('sends remember = false when unchecked', async () => {
+      renderLogin()
 
-         await waitFor(() =>
-            expect(mocks.login).toHaveBeenCalledWith({
-               email: ADMIN.email,
-               password: ADMIN.password,
-               remember: true,
-            }),
-         )
-         expect(mocks.navigate).toHaveBeenCalledWith('/home', { replace: true })
-      })
+      await user.type(emailInput(), ADMIN.email)
+      await user.type(passwordInput(), ADMIN.password)
+      await user.click(screen.getByRole('checkbox', { name: /remember me/i }))
+      await user.click(submitButton())
 
-      test('sends remember = false when unchecked', async () => {
-         renderLogin()
+      await waitFor(() =>
+        expect(mocks.login).toHaveBeenCalledWith(expect.objectContaining({ remember: false })),
+      )
+    })
 
-         await user.type(emailInput(), ADMIN.email)
-         await user.type(passwordInput(), ADMIN.password)
-         await user.click(screen.getByRole('checkbox', { name: /remember me/i }))
-         await user.click(submitButton())
+    test('shows the button loading state while the request is pending', async () => {
+      let resolveLogin
+      mocks.login.mockReturnValue(new Promise((resolve) => (resolveLogin = resolve)))
+      renderLogin()
 
-         await waitFor(() =>
-            expect(mocks.login).toHaveBeenCalledWith(expect.objectContaining({ remember: false })),
-         )
-      })
+      await user.type(emailInput(), ADMIN.email)
+      await user.type(passwordInput(), ADMIN.password)
+      await user.click(submitButton())
 
-      test('shows the button loading state while the request is pending', async () => {
-         let resolveLogin
-         mocks.login.mockReturnValue(new Promise((resolve) => (resolveLogin = resolve)))
-         renderLogin()
+      expect(await screen.findByRole('img', { name: 'loading' })).toBeVisible()
 
-         await user.type(emailInput(), ADMIN.email)
-         await user.type(passwordInput(), ADMIN.password)
-         await user.click(submitButton())
+      resolveLogin()
+      await waitFor(() => expect(mocks.navigate).toHaveBeenCalled())
+      await waitFor(() =>
+        expect(screen.queryByRole('img', { name: 'loading' })).not.toBeInTheDocument(),
+      )
+    })
 
-         expect(await screen.findByRole('img', { name: 'loading' })).toBeVisible()
+    test('shows a dismissible alert when login fails', async () => {
+      mocks.login.mockRejectedValue(new Error('Invalid credentials'))
+      renderLogin()
 
-         resolveLogin()
-         await waitFor(() => expect(mocks.navigate).toHaveBeenCalled())
-         await waitFor(() => expect(screen.queryByRole('img', { name: 'loading' })).not.toBeInTheDocument())
-      })
+      await user.type(emailInput(), ADMIN.email)
+      await user.type(passwordInput(), WRONG_PASSWORD)
+      await user.click(submitButton())
 
-      test('shows a dismissible alert when login fails', async () => {
-         mocks.login.mockRejectedValue(new Error('Invalid credentials'))
-         renderLogin()
+      const alert = await screen.findByRole('alert')
+      expect(alert).toHaveTextContent('Invalid credentials')
+      expect(mocks.navigate).not.toHaveBeenCalled()
 
-         await user.type(emailInput(), ADMIN.email)
-         await user.type(passwordInput(), WRONG_PASSWORD)
-         await user.click(submitButton())
+      await user.click(screen.getByRole('button', { name: /close/i }))
+      await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument())
+    })
 
-         const alert = await screen.findByRole('alert')
-         expect(alert).toHaveTextContent('Invalid credentials')
-         expect(mocks.navigate).not.toHaveBeenCalled()
+    test('falls back to a generic message when the error has no message', async () => {
+      mocks.login.mockRejectedValue(new Error(''))
+      renderLogin()
 
-         await user.click(screen.getByRole('button', { name: /close/i }))
-         await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument())
-      })
+      await user.type(emailInput(), ADMIN.email)
+      await user.type(passwordInput(), WRONG_PASSWORD)
+      await user.click(submitButton())
 
-      test('falls back to a generic message when the error has no message', async () => {
-         mocks.login.mockRejectedValue(new Error(''))
-         renderLogin()
-
-         await user.type(emailInput(), ADMIN.email)
-         await user.type(passwordInput(), WRONG_PASSWORD)
-         await user.click(submitButton())
-
-         expect(await screen.findByRole('alert')).toHaveTextContent(
-            'Something went wrong. Please try again.',
-         )
-      })
-   })
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        'Something went wrong. Please try again.',
+      )
+    })
+  })
 })
