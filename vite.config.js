@@ -14,8 +14,16 @@ export default defineConfig({
       output: {
         codeSplitting: {
           groups: [
-            { name: 'react-vendor', test: /node_modules[\\/](react|react-dom|react-router)[\\/]/, priority: 20 },
-            { name: 'antd-vendor', test: /node_modules[\\/](antd|@ant-design|rc-[^\\/]+)[\\/]/, priority: 10 },
+            {
+              name: 'react-vendor',
+              test: /node_modules[\\/](react|react-dom|react-router)[\\/]/,
+              priority: 20,
+            },
+            {
+              name: 'antd-vendor',
+              test: /node_modules[\\/](antd|@ant-design|rc-[^\\/]+)[\\/]/,
+              priority: 10,
+            },
           ],
         },
       },
