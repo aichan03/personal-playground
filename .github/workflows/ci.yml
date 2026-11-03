@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: npm run eslint
+      - run: npm run lint
 
   prettier:
     needs: eslint
@@ -46,7 +46,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: npm run test:run
+      - run: npm run test:unit
 
   playwright:
     needs: vitest
