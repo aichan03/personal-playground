@@ -1,34 +1,34 @@
-import { createBrowserRouter } from "react-router";
-import ErrorPage from "./pages/Errorpage";
-import MainLayout from "./layouts/MainLayout.jsx";
-import { useAppTheme } from "./providers/ThemeProvider.jsx";
-import { ConfigProvider } from "antd";
+import { createBrowserRouter } from 'react-router'
 
-function AppTheme() {
-   const { themeConfig } = useAppTheme();
-   return (
-      <ConfigProvider theme={themeConfig}>
-         <MainLayout />
-      </ConfigProvider>
-   );
-}
+import { ProtectedRoute, PublicOnlyRoute } from './components/ProtectedRoute.jsx'
+import RootLayout from './layouts/RootLayout.jsx'
+import ErrorPage from './pages/Errorpage'
 
 const router = createBrowserRouter([
-   {
-      path: '/',
-      element: <AppTheme />,
-      errorElement: <ErrorPage />,
-      children: [
-         {
-            index: true,
-            lazy: () => import('./pages/Home.jsx').then((m) => ({ Component: m.default }))
-         },
-         {
-            path: '*',
-            lazy: () => import('./pages/NotFound.jsx').then((m) => ({ Component: m.default }))
-         }
-      ]
-   }
-]);
+  {
+    element: <RootLayout />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        element: <PublicOnlyRoute />,
+        children: [
+          {
+            path: '/',
+            lazy: () => import('./pages/Login.jsx').then((i) => ({ Component: i.default })),
+          },
+        ],
+      },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: '/home',
+            lazy: () => import('./layouts/MainLayout.jsx').then((i) => ({ Component: i.default })),
+          },
+        ],
+      },
+    ],
+  },
+])
 
 export default router
