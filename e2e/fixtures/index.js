@@ -1,5 +1,6 @@
 // e2e/fixtures/index.js
 import { test as base, expect } from '@playwright/test'
+
 import { mockAuth, mockLogin } from '../mocks/api.js'
 import { LoginPage } from '../pages/LoginPage.js'
 

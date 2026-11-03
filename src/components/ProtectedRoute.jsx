@@ -1,5 +1,6 @@
-import { Navigate, Outlet, useLocation } from 'react-router'
 import { Spin } from 'antd'
+import { Navigate, Outlet, useLocation } from 'react-router'
+
 import { useAuth } from '../providers/auth'
 
 function FullPageSpinner() {

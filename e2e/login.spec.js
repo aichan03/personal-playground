@@ -1,6 +1,6 @@
 // e2e/login.spec.js
-import { ADMIN, INVALID_EMAIL, WRONG_PASSWORD } from '../tests/data/users.js'
 import { test, expect } from './fixtures/index.js'
+import { ADMIN, INVALID_EMAIL, WRONG_PASSWORD } from '../tests/data/users.js'
 
 test.describe('Login page', () => {
   test.beforeEach(async ({ loginPage }) => {

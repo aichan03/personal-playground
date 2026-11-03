@@ -1,7 +1,8 @@
 import { createBrowserRouter } from 'react-router'
-import ErrorPage from './pages/Errorpage'
-import RootLayout from './layouts/RootLayout.jsx'
+
 import { ProtectedRoute, PublicOnlyRoute } from './components/ProtectedRoute.jsx'
+import RootLayout from './layouts/RootLayout.jsx'
+import ErrorPage from './pages/Errorpage'
 
 const router = createBrowserRouter([
   {
@@ -13,7 +14,7 @@ const router = createBrowserRouter([
         children: [
           {
             path: '/',
-            lazy: () => import('./pages/Login.jsx').then((m) => ({ Component: m.default })),
+            lazy: () => import('./pages/Login.jsx').then((i) => ({ Component: i.default })),
           },
         ],
       },
@@ -22,7 +23,7 @@ const router = createBrowserRouter([
         children: [
           {
             path: '/home',
-            lazy: () => import('./layouts/MainLayout.jsx').then((m) => ({ Component: m.default })),
+            lazy: () => import('./layouts/MainLayout.jsx').then((i) => ({ Component: i.default })),
           },
         ],
       },

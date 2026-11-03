@@ -1,5 +1,6 @@
-import { describe, test, expect, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
+import { describe, test, expect, vi } from 'vitest'
+
 import { AuthContext } from './AuthContext.js'
 import { useAuth } from './useAuth.js'
 

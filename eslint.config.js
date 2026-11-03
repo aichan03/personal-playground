@@ -1,11 +1,12 @@
 // eslint.config.js
 import js from '@eslint/js'
-import globals from 'globals'
+import prettier from 'eslint-config-prettier'
+import importPlugin from 'eslint-plugin-import' // optional: remove with the import rules below
 import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
-import importPlugin from 'eslint-plugin-import' // optional: remove with the import rules below
-import prettier from 'eslint-config-prettier'
+import globals from 'globals'
+// import unicorn from 'eslint-plugin-unicorn' // optional: only used for file naming
 
 export default [
   {
@@ -46,20 +47,99 @@ export default [
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
 
       // Undefined / unused values
-      // (no-undef and react/jsx-no-undef come from the recommended sets above)
       'no-unused-vars': ['error', { varsIgnorePattern: '^_', argsIgnorePattern: '^_' }],
 
       // Imports (optional)
       'import/named': 'error',
       'import/no-unresolved': 'error',
+      'import/first': 'error',
+      'import/no-duplicates': 'error',
+      'import/newline-after-import': 'error',
+      // 'import/order': [
+      //   'warn',
+      //   {
+      //     groups: ['builtin', 'external', 'internal', ['parent', 'sibling', 'index']],
+      //     'newlines-between': 'always',
+      //     alphabetize: { order: 'asc', caseInsensitive: true },
+      //   },
+      // ],
 
-      // Code quality
+      // ---------- Naming conventions ----------
+      // camelCase for variables/functions; UPPER_SNAKE_CASE constants are still allowed
+      // camelcase: ['error', { properties: 'never', ignoreDestructuring: false }],
+      // PascalCase for constructors/classes; don't call PascalCase without `new`
+      'new-cap': ['error', { newIsCap: true, capIsNew: false }],
+      // PascalCase for React components (also blocks e.g. <my_component />)
+      'react/jsx-pascal-case': ['error', { allowAllCaps: false }],
+      // Avoid meaningless one-letter names (allow common loop/coordinate/event names)
+      'id-length': [
+        'warn',
+        { min: 2, exceptions: ['i', 'j', 'x', 'y', 'e', '_', '$'], properties: 'never' },
+      ],
+      // Don't shadow globals/restricted names (e.g. `name`, `event`, `status`)
+      'no-restricted-globals': ['error', 'event', 'name', 'status', 'length'],
+      'no-shadow': 'error',
+      'no-underscore-dangle': ['warn', { allowAfterThis: false, allow: [] }],
+
+      // ---------- React conventions ----------
+      'react/jsx-key': ['error', { checkFragmentShorthand: true }],
+      'react/no-array-index-key': 'warn',
+      'react/self-closing-comp': 'error',
+      'react/jsx-boolean-value': ['error', 'never'], // <Foo disabled /> not disabled={true}
+      'react/jsx-no-useless-fragment': 'warn',
+      'react/jsx-curly-brace-presence': ['error', { props: 'never', children: 'never' }],
+      'react/function-component-definition': [
+        'error',
+        { namedComponents: 'function-declaration', unnamedComponents: 'arrow-function' },
+      ],
+      'react/no-unstable-nested-components': 'error',
+      'react/hook-use-state': 'warn', // [value, setValue] naming symmetry
+      'react/destructuring-assignment': ['warn', 'always'],
+      'react/jsx-no-target-blank': 'error',
+
+      // ---------- Code quality ----------
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       eqeqeq: ['error', 'always'],
       'prefer-const': 'error',
       'no-var': 'error',
+      curly: ['error', 'all'],
+      'default-case': 'error',
+      'default-case-last': 'error',
+      'consistent-return': 'error',
+      'no-else-return': ['error', { allowElseIf: false }],
+      'no-nested-ternary': 'error',
+      'no-param-reassign': [
+        'error',
+        { props: true, ignorePropertyModificationsFor: ['draft', 'state'] },
+      ],
+      'no-implicit-coercion': 'error',
+      'no-throw-literal': 'error',
+      'no-return-await': 'error',
+      'no-useless-rename': 'error',
+      'no-useless-return': 'error',
+      'no-lonely-if': 'error',
+      'object-shorthand': ['error', 'always'],
+      'prefer-template': 'error',
+      'prefer-arrow-callback': 'error',
+      'prefer-destructuring': ['warn', { object: true, array: false }],
+      'prefer-object-spread': 'error',
+      'prefer-rest-params': 'error',
+      'prefer-spread': 'error',
+      'dot-notation': 'error',
+      'max-params': ['warn', 4],
+      'max-depth': ['warn', 4],
+      complexity: ['warn', 15],
     },
   },
+
+  // Optional: file naming (components PascalCase, everything else camelCase)
+  // {
+  //   files: ['src/**/*.{js,jsx}'],
+  //   plugins: { unicorn },
+  //   rules: {
+  //     'unicorn/filename-case': ['error', { cases: { pascalCase: true, camelCase: true } }],
+  //   },
+  // },
 
   // Node environment: Vitest helpers, Playwright specs, config files
   {
@@ -67,6 +147,12 @@ export default [
     languageOptions: { globals: { ...globals.node } },
     rules: { 'no-console': 'off' },
   },
+
+  // Config files commonly use default exports and relaxed naming
+  // {
+  //   files: ['*.config.{js,cjs,mjs}'],
+  //   rules: { 'unicorn/filename-case': 'off', camelcase: 'off' },
+  // },
 
   // Playwright's fixture callback is named `use`, which the hooks rule mistakes for React's use()
   {
@@ -78,6 +164,11 @@ export default [
   {
     files: ['**/*.test.{js,jsx}'],
     languageOptions: { globals: { ...(globals.vitest ?? {}) } },
+    rules: {
+      'max-params': 'off',
+      'id-length': 'off',
+      'no-magic-numbers': 'off',
+    },
   },
 
   // Must be last: disables rules that conflict with Prettier

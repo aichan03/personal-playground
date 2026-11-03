@@ -1,11 +1,12 @@
 // pages/Login.jsx
-import { useState } from 'react'
-import { Alert, Button, Card, Checkbox, Flex, Form, Input, Switch, Typography, theme } from 'antd'
-import { MdOutlineDashboardCustomize } from 'react-icons/md'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
+import { Alert, Button, Card, Checkbox, Flex, Form, Input, Switch, Typography, theme } from 'antd'
+import { useState } from 'react'
+import { MdOutlineDashboardCustomize } from 'react-icons/md'
 import { useNavigate } from 'react-router'
-import { useTheme } from '../providers/theme'
+
 import { useAuth } from '../providers/auth'
+import { useTheme } from '../providers/theme'
 
 const { Title, Text } = Typography
 

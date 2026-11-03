@@ -1,8 +1,9 @@
 // layouts/MainLayout.jsx  (your layout + user menu with logout)
-import { Avatar, Breadcrumb, Dropdown, Layout, Menu, Space, Switch, Typography, theme } from 'antd'
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons'
+import { Avatar, Breadcrumb, Dropdown, Layout, Menu, Space, Switch, Typography, theme } from 'antd'
 import { MdOutlineDashboardCustomize } from 'react-icons/md'
 import { Link, Outlet, useNavigate } from 'react-router'
+
 import { useAuth } from '../providers/auth'
 import { useTheme } from '../providers/theme'
 
@@ -73,7 +74,7 @@ export default function MainLayout() {
             <Dropdown menu={userMenu} placement="bottomRight" trigger={['click']}>
               <Space style={{ cursor: 'pointer' }}>
                 <Avatar size="small" icon={<UserOutlined />} />
-                <Typography.Text>{'Sample User'}</Typography.Text>
+                <Typography.Text>Sample User</Typography.Text>
               </Space>
             </Dropdown>
           </div>

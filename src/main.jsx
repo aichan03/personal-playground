@@ -1,10 +1,12 @@
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import router from './Router.jsx'
 import React from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider } from 'react-router/dom'
+
 import { ThemeProvider } from './providers/theme/ThemeProvider.jsx'
+import router from './Router.jsx'
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const queryClient = new QueryClient()
 
@@ -13,7 +15,7 @@ createRoot(document.getElementById('root')).render(
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         {/*Auth Provider here */}
-        <RouterProvider router={router}></RouterProvider>
+        <RouterProvider router={router} />
       </QueryClientProvider>
     </ThemeProvider>
   </React.StrictMode>,

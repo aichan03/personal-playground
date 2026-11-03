@@ -1,9 +1,10 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
-import { api } from '../../lib/api.js'
+import { describe, test, expect, vi, beforeEach } from 'vitest'
+
 import { AuthProvider } from './AuthProvider.jsx'
 import { useAuth } from './useAuth.js'
 import { ADMIN, PUBLIC_USER } from '../../../tests/data/users.js'
+import { api } from '../../lib/api.js'
 
 vi.mock('../../lib/api.js', () => ({
   api: { get: vi.fn(), post: vi.fn() },

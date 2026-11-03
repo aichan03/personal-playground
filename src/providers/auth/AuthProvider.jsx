@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { api } from '../../lib/api.js'
+
 import { AuthContext } from './AuthContext.js'
+import { api } from '../../lib/api.js'
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
@@ -30,7 +31,7 @@ export function AuthProvider({ children }) {
   }, [])
 
   const value = useMemo(
-    () => ({ user, loading, isAuthenticated: !!user, login, logout }),
+    () => ({ user, loading, isAuthenticated: Boolean(user), login, logout }),
     [user, loading, login, logout],
   )
 
