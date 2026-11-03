@@ -1,0 +1,13 @@
+name: Setup
+description: Set up Node and install dependencies
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: npm
+
+    - run: npm ci --prefer-offline --no-audit --no-fund
+      shell: bash
