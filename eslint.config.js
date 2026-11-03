@@ -45,7 +45,12 @@ export default [
     languageOptions: { globals: { ...globals.node } },
     rules: { 'no-console': 'off' },
   },
-
+  {
+    files: ['e2e/**/*.js'],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
+    },
+  },
   // Unit tests, if you add Vitest later
   {
     files: ['**/*.test.{js,jsx}'],
