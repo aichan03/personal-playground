@@ -1,8 +1,9 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config' // changed from 'vite'
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [react()],
+  base: command === 'build' ? '/personal-playground/' : '/',
   test: {
     globals: true,
     environment: 'jsdom',
@@ -38,4 +39,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))

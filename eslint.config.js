@@ -6,7 +6,7 @@ import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import globals from 'globals'
-// import unicorn from 'eslint-plugin-unicorn' // optional: only used for file naming
+// import unicorn from 'eslint-plugin-unicorn' // optional: only used for file naming //only available in eslint-v10
 
 export default [
   {
@@ -129,6 +129,22 @@ export default [
       'max-params': ['warn', 4],
       'max-depth': ['warn', 4],
       complexity: ['warn', 15],
+
+      // <Foo /> must be defined or imported in scope (already in react recommended; shown explicitly)
+      'react/jsx-no-undef': ['error', { allowGlobals: false }],
+
+      // Marks components used in JSX as "used", so an import only used as <Foo /> isn't flagged,
+      // while an imported but never-rendered component still is
+      'react/jsx-uses-vars': 'error',
+
+      // Catches plain undefined identifiers (functions, variables, etc.)
+      'no-undef': 'error',
+
+      // Default import must have a default export: import Foo from './Foo'
+      'import/default': 'error',
+
+      // import * as ns, then ns.Foo must exist
+      'import/namespace': 'error',
     },
   },
 
