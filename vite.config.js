@@ -3,6 +3,7 @@ import { defineConfig } from 'vitest/config' // changed from 'vite'
 
 export default defineConfig({
   plugins: [react()],
+  base: '/personal-playground/', // use '/' only if the repo is named aichan03.github.io
   test: {
     globals: true,
     environment: 'jsdom',

@@ -6,7 +6,7 @@ import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import globals from 'globals'
-// import unicorn from 'eslint-plugin-unicorn' // optional: only used for file naming
+// import unicorn from 'eslint-plugin-unicorn' // optional: only used for file naming //only available in eslint-v10
 
 export default [
   {
