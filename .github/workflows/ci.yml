@@ -106,6 +106,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
 
       - uses: actions/upload-pages-artifact@v4
         with:
