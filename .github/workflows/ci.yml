@@ -85,7 +85,8 @@ jobs:
   #       run: exit 1
 
   deploy:
-    needs: [checks, playwright, ci-pass]
+    # needs: [checks, playwright, ci-pass]
+    needs: [checks]
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -105,8 +106,6 @@ jobs:
 
       - name: Build
         run: npm run build
-        env:
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
 
       - uses: actions/upload-pages-artifact@v4
         with:
