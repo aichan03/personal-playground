@@ -145,6 +145,10 @@ export default [
 
       // import * as ns, then ns.Foo must exist
       'import/namespace': 'error',
+
+      //Experimental
+      // It forces you to define variables, functions, or classes before using them, which indirectly imposes an order
+      'no-use-before-define': ['error', { functions: false, classes: true, variables: true }],
     },
   },
 
